@@ -46,33 +46,33 @@ namespace bintree {
         }
 
         TNodePtr getParent() {
-            return parent.lock();
+            return parent.lock();  // because parent is weak_ptr
         }
 
         TNodeConstPtr getParent() const {
-            return parent.lock();
+            return parent.lock(); // because parent is weak_ptr
         }
 
         static TNodePtr createLeaf(T v) {
-            return TNodePtr(new TNode(v)); // Constructor is private, so we can't use make_shared
+            return TNodePtr(new TNode(v));  // constructor is private, so we can't use make_shared
         }
 
         static TNodePtr fork(T v, TNodePtr l, TNodePtr r) {
-            TNodePtr ptr = TNodePtr(new TNode(v)); // Constructor is private, so we can't use make_shared
+            TNodePtr ptr = TNodePtr(new TNode(v));  // constructor is private, so we can't use make_shared
             ptr->replaceLeft(l);
             ptr->replaceRight(r);
             return ptr;
         }
 
         TNodePtr replaceLeft(TNodePtr l) {
-            setParent(l, this->shared_from_this());
+            setParent(l, this->shared_from_this());  // creation shared ptr from this is bad idea in order memory release twice
             setParent(left, nullptr);
             std::swap(l, left);
             return l;
         }
 
         TNodePtr replaceRight(TNodePtr r) {
-            setParent(r, this->shared_from_this());
+            setParent(r, this->shared_from_this());  // creation shared ptr from this is bad idea in order memory release twice
             setParent(right, nullptr);
             std::swap(r, right);
             return r;
@@ -97,13 +97,13 @@ namespace bintree {
         T value;
         TNodePtr left = nullptr;
         TNodePtr right = nullptr;
-        std::weak_ptr<TNode> parent = std::weak_ptr<TNode>(); // For right memory free
+        std::weak_ptr<TNode> parent = std::weak_ptr<TNode>(); // to avoid cycle link (because it can leads to memory leak)
 
         TNode(T v)
             : value(v)
         {
         }
-        TNode(T v, TNodePtr l, TNodePtr r)
+        TNode(T v, TNodePtr l, TNodePtr r)  // the same problem memory release twice
             : value(v)
             , left(l)
             , right(r)

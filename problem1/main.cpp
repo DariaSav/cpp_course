@@ -27,7 +27,7 @@ int main() {
     assert(node->getRight()->getParent() == node);
 
     auto leaf = TNode<int>::createLeaf(4);
-    auto node3 = TNode<int>::fork(0, node, leaf);
+    auto node3 = TNode<int>::fork(0, node, leaf);  // problem with memory release twice
 
     assert(node3->getValue() == 0);
     assert(node3->getLeft()->getValue() == 1);
