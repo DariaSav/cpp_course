@@ -103,7 +103,8 @@ namespace bintree {
             : value(v)
         {
         }
-        TNode(T v, TNodePtr l, TNodePtr r)  // the same problem memory release twice
+        TNode(T v, TNodePtr l, TNodePtr r)  //  this method is not used, because we can't use enable_shared_from_this
+                                            // in constructor, in this way we can't set parent for left and right child
             : value(v)
             , left(l)
             , right(r)
