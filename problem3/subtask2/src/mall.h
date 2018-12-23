@@ -1,3 +1,6 @@
+#ifndef CPP_COURSE_SHOP_H
+#define CPP_COURSE_SHOP_H
+
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>
@@ -84,46 +87,7 @@ protected:
 
     void DeleteProduct(std::shared_ptr<IProduct> prod) {
         std::lock_guard<std::mutex> lock(_on_change);
-         _products_on_sale.erase(prod->GetName());
-    }
-};
-
-
-void IProduct::Attach(std::weak_ptr <IShop> shop)  {
-    auto shop_ptr = shop.lock();
-    if (shop_ptr != nullptr) {
-        _shops.push_back(shop);
-        shop_ptr->UpdateProduct(this->shared_from_this());
-    }
-};
-
-
-void IProduct::Detach(std::weak_ptr <IShop> shop)  {
-    auto shop_ptr = shop.lock();
-    if (shop_ptr != nullptr) {
-        // delete from this shop
-        shop_ptr->DeleteProduct(this->shared_from_this());
-
-        // delete from shops list
-        for (auto iter=_shops.begin(); iter != _shops.end(); iter++) {
-            auto track_shop_ptr = iter->lock();
-            if (track_shop_ptr != nullptr) {
-                if (shop_ptr == track_shop_ptr) {
-                    _shops.erase(iter);
-                    break;
-                }
-            }
-        }
-    }
-};
-
-
-void IProduct::NotifyShops() {
-    for (auto shop: _shops) {
-        auto shop_ptr = shop.lock();
-        if (shop_ptr != nullptr) {
-            shop_ptr->UpdateProduct(this->shared_from_this());
-        }
+        _products_on_sale.erase(prod->GetName());
     }
 };
 
@@ -134,7 +98,7 @@ enum ToySize { SMALL, MIDDLE, BIG };
 class TeddyBear: public IProduct {
 public:
     TeddyBear(double price, ToySize size, const std::string &seria)
-        : IProduct("TeddyBear", price), _size(size), _seria(seria) {};
+            : IProduct("TeddyBear", price), _size(size), _seria(seria) {};
 private:
     ToySize _size;
     std::string _seria;
@@ -159,22 +123,4 @@ public:
 };
 
 
-
-int main() {
-    auto toy_shop_ptr = std::make_shared<ClassicShop>(std::string("Best Toys"));
-
-    auto bear = std::make_shared<TeddyBear>(100, SMALL, "super_cool");
-
-    bear->Attach(toy_shop_ptr);
-    toy_shop_ptr->AnnounceSales();
-
-    bear->StartSales();
-    toy_shop_ptr->AnnounceSales();
-
-    bear->Detach(toy_shop_ptr);
-    toy_shop_ptr->AnnounceSales();
-
-    bear->Attach(toy_shop_ptr);
-    toy_shop_ptr->AnnounceSales();
-
-}
+#endif //CPP_COURSE_SHOP_H
