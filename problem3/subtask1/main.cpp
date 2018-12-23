@@ -29,25 +29,24 @@ int main() {
     });
 
     std::thread consumer([&]() {
-        while (!done) {
-            while (true) {
-                std::lock_guard<std::mutex> lock(queue_mutex);
-                if (!items.empty()) {
-                    items.pop();
+        while (true) {
+            std::lock_guard<std::mutex> lock(queue_mutex);
+            if (!items.empty()) {
+                items.pop();
 
-                    // ... some code may be here ... for example, sleep
-                    std::this_thread::sleep_for(std::chrono::milliseconds(int(float(std::rand()) / RAND_MAX) * 10));
+                // ... some code may be here ... for example, sleep
+                std::this_thread::sleep_for(std::chrono::milliseconds(int(float(std::rand()) / RAND_MAX) * 10));
 
-                    count--;
+                count--;
 
-                } else {
-                    break;
-                }
+            } else if (done) {
+                break;
             }
         }
     });
 
     producer.join();
     consumer.join();
-    std::cout << count << std::endl;
+    std::cout << "Count: " << count << std::endl;
+    std::cout << "Queue size: " << items.size() << std::endl;
 }
